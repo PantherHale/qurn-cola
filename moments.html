@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Moments · Qurn Cola</title>
+  <meta name="description" content="Qurn Cola, a fictional cola made with qurn. Since 1886, in seven moments.">
+  <meta name="theme-color" content="#e4000f">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%23e4000f%27/%3E%3Ctext x=%2716%27 y=%2723%27 font-size=%2720%27 font-family=%27Georgia,serif%27 font-style=%27italic%27 text-anchor=%27middle%27 fill=%27white%27%3EC%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=JetBrains+Mono:wght@500&family=Yellowtail&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/pages.css">
+</head>
+<body class="page-moments">
+  <a class="sr-only" href="#main">Skip to content</a>
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <nav class="nav" aria-label="Main">
+    <a class="nav__mark" href="index.html" aria-label="Qurn Cola home">Qurn Cola</a>
+    <ul class="nav__links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="flavours.html">Flavours</a></li>
+      <li><a href="moments.html" aria-current="page">Moments</a></li>
+      <li><a href="again.html">Again</a></li>
+    </ul>
+  </nav>
+
+
+  <main id="main" class="mo">
+    <div class="mo__bottle" aria-hidden="true">
+      <svg viewBox="0 0 240 640" class="bottle" id="bottle">
+        <defs>
+          <clipPath id="bottle-clip">
+            <path d="M120 8 L136 8 Q140 8 140 13 L140 24 Q140 28 136 30 L136 44 Q142 90 146 120 Q150 150 162 180 Q196 235 200 290 Q202 340 182 372 Q172 388 172 404 Q172 418 182 440 Q206 490 206 545 Q206 600 196 620 Q190 632 172 632 L120 632 Z"/>
+            <path transform="translate(240 0) scale(-1 1)" d="M120 8 L136 8 Q140 8 140 13 L140 24 Q140 28 136 30 L136 44 Q142 90 146 120 Q150 150 162 180 Q196 235 200 290 Q202 340 182 372 Q172 388 172 404 Q172 418 182 440 Q206 490 206 545 Q206 600 196 620 Q190 632 172 632 L120 632 Z"/>
+          </clipPath>
+        </defs>
+        <ellipse class="bottle__shadow" cx="120" cy="640" rx="92" ry="9"/>
+        <g clip-path="url(#bottle-clip)">
+          <g class="bottle__liquid" id="liquid">
+            <path class="bottle__wave" d="M-40 0 Q0 -10 40 0 T120 0 T200 0 T280 0 T360 0 V700 H-40 Z"/>
+            <path class="bottle__foam" d="M-40 -2 Q0 -12 40 -2 T120 -2 T200 -2 T280 -2 T360 -2 L360 6 Q320 12 280 6 T200 6 T120 6 T40 6 T-40 6 Z"/>
+            <circle class="bottle__bubble" cx="96" cy="120" r="3"/>
+            <circle class="bottle__bubble" cx="140" cy="200" r="2"/>
+            <circle class="bottle__bubble" cx="118" cy="320" r="2.5"/>
+            <circle class="bottle__bubble" cx="80" cy="260" r="1.6"/>
+            <circle class="bottle__bubble" cx="160" cy="90" r="1.8"/>
+            <circle class="bottle__bubble" cx="104" cy="420" r="2.2"/>
+            <circle class="bottle__bubble" cx="150" cy="380" r="1.4"/>
+            <circle class="bottle__bubble" cx="70" cy="500" r="2.6"/>
+            <circle class="bottle__bubble" cx="172" cy="470" r="1.7"/>
+            <circle class="bottle__bubble" cx="128" cy="540" r="1.3"/>
+            <circle class="bottle__bubble" cx="88" cy="160" r="1.2"/>
+          </g>
+          <!-- glass highlights ride over the cola -->
+          <path class="bottle__shine" d="M58 250 Q52 300 62 350"/>
+          <path class="bottle__shine bottle__shine--thin" d="M70 470 Q60 540 74 610"/>
+          <path class="bottle__shine bottle__shine--thin" d="M129 60 Q131 120 136 160"/>
+        </g>
+        <!-- the script on the waist, drawn from the real wordmark outline -->
+        <text class="bottle__script" id="bottle-script" x="120" y="404" text-anchor="middle" transform="rotate(-7 120 392)">Qurn Cola</text>
+        <!-- crown cap: pops off at the finale -->
+        <g class="bottle__cap" id="cap">
+          <path class="bottle__cap-skirt" d="M98 30 L101 12 Q120 2 139 12 L142 30 L138 27 L134 31 L130 27 L126 31 L122 27 L118 31 L114 27 L110 31 L106 27 L102 31 Z"/>
+          <path class="bottle__cap-top" d="M101 12 Q120 2 139 12 Q120 7 101 12 Z"/>
+          <rect class="bottle__cap-shine" x="104" y="13" width="4" height="13" rx="2"/>
+        </g>
+        <g class="bottle__lines" fill="none">
+          <path class="draw" pathLength="1" d="M120 8 L136 8 Q140 8 140 13 L140 24 Q140 28 136 30 L136 44 Q142 90 146 120 Q150 150 162 180 Q196 235 200 290 Q202 340 182 372 Q172 388 172 404 Q172 418 182 440 Q206 490 206 545 Q206 600 196 620 Q190 632 172 632 L120 632"/>
+          <path class="draw" pathLength="1" transform="translate(240 0) scale(-1 1)" d="M120 8 L136 8 Q140 8 140 13 L140 24 Q140 28 136 30 L136 44 Q142 90 146 120 Q150 150 162 180 Q196 235 200 290 Q202 340 182 372 Q172 388 172 404 Q172 418 182 440 Q206 490 206 545 Q206 600 196 620 Q190 632 172 632 L120 632"/>
+          <path class="draw flute" pathLength="1" d="M66 462 Q56 540 68 618"/>
+          <path class="draw flute" pathLength="1" d="M92 452 Q86 540 94 624"/>
+          <path class="draw flute" pathLength="1" d="M120 448 L120 626"/>
+          <path class="draw flute" pathLength="1" d="M148 452 Q154 540 146 624"/>
+          <path class="draw flute" pathLength="1" d="M174 462 Q184 540 172 618"/>
+          <path class="draw flute" pathLength="1" d="M84 200 Q66 250 62 300"/>
+          <path class="draw flute" pathLength="1" d="M156 200 Q174 250 178 300"/>
+          <path class="draw flute" pathLength="1" d="M100 190 Q92 250 92 310"/>
+          <path class="draw flute" pathLength="1" d="M140 190 Q148 250 148 310"/>
+        </g>
+      </svg>
+      <div class="mo__cheers" id="cheers" aria-live="polite">
+        <p class="mo__cheers-word script">Cheers.</p>
+        <p class="mo__cheers-line">Here's to the next moment.</p>
+      </div>
+      <div class="mo__burst" id="burst" aria-hidden="true"></div>
+    </div>
+
+    <h1 class="sr-only">Moments since 1886</h1>
+    <ol class="mo__list" id="mo-list">
+      <li class="mo__item" data-bg="#e4000f" data-fg="#fff4e8"><p class="mega outline mo__year">1886</p><h2 class="h2 reveal-words">First glass, five cents.</h2>
+        <p class="line reveal mo__line">Poured at Jacobs' Pharmacy in Atlanta, one glass at a time.</p></li>
+      <li class="mo__item" data-bg="#140306" data-fg="#fff4e8"><p class="mega outline mo__year">1886</p><h2 class="h2"><span class="script mo__script reveal">Qurn Cola</span><span class="reveal-words">written by hand.</span></h2>
+        <p class="line reveal mo__line">A bookkeeper named it, then wrote it out in his flowing script.</p></li>
+      <li class="mo__item" data-bg="#fff4e8" data-fg="#c8000d"><p class="mega outline mo__year">1915</p><h2 class="h2 reveal-words">A bottle you'd know in the dark.</h2>
+        <p class="line reveal mo__line">Shaped so you could tell it by touch alone.</p></li>
+      <li class="mo__item" data-bg="#7a0008" data-fg="#fff4e8"><p class="mega outline mo__year">1931</p><h2 class="h2 reveal-words">Santa joins the ads.</h2>
+        <p class="line reveal mo__line">Warm, round and red, with a cold one in his hand.</p></li>
+      <li class="mo__item" data-bg="#e4000f" data-fg="#fff4e8"><p class="mega outline mo__year">1971</p><h2 class="h2 reveal-words">A hilltop learns to sing.</h2>
+        <p class="line reveal mo__line">A song about sharing a Qurn goes round the world.</p></li>
+      <li class="mo__item" data-bg="#140306" data-fg="#fff4e8"><p class="mega outline mo__year">2011</p><h2 class="h2 reveal-words">Your name on a can.</h2>
+        <p class="line reveal mo__line">The logo steps aside so a friend's name can take its place.</p></li>
+      <li class="mo__item" data-bg="#e4000f" data-fg="#fff4e8"><p class="mega outline mo__year">2016</p><h2 class="h2 reveal-words">Feel the fizz.</h2>
+        <p class="line reveal mo__line">Every flavour under one red banner.</p>
+        <a class="btn btn--cream reveal mo__cta" href="index.html#share">Put your name on one <span class="btn__arrow" aria-hidden="true">&#8599;</span></a></li>
+    </ol>
+    <nav class="mo__rail" id="mo-rail" aria-label="Jump to a moment"></nav>
+  </main>
+
+  <footer class="footer">
+    <p class="footer__big" aria-hidden="true">Qurn Cola</p>
+    <div class="footer__row">
+      <ul class="footer__links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="flavours.html">Flavours</a></li>
+        <li><a href="moments.html">Moments</a></li>
+        <li><a href="again.html">Again</a></li>
+      </ul>
+      <p class="footer__legal">Qurn Cola is a fictional brand. Designed, built and tested end to end with qurn skills. Made by Panther.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+  <script src="assets/js/common.js"></script>
+  <script src="assets/js/lanyard.js"></script>
+  <script src="assets/js/moments.js"></script>
+</body>
+</html>

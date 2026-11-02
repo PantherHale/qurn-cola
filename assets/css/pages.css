@@ -1,0 +1,207 @@
+/* ---------- flavours ---------- */
+.fx { height: 520vh; }
+.fx__ghosts { overflow: hidden; }
+.fx__ghost {
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -46%) scale(0.96);
+  font-size: clamp(2.6rem, 9.5vw, 11rem);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.7s var(--ease-out), transform 1s var(--ease-out);
+}
+.fx__ghost.is-on { opacity: 0.4; transform: translate(-50%, -50%) scale(1); }
+.fx__copy { position: absolute; top: 50%; transform: translateY(-50%); width: min(34rem, 42vw); }
+.fx__stage[data-side="right"] .fx__copy { left: var(--gutter); }
+.fx__stage[data-side="left"] .fx__copy { right: var(--gutter); }
+.fx__panel {
+  position: absolute; left: 0; right: 0; top: 50%;
+  transform: translateY(-40%); opacity: 0; visibility: hidden;
+  transition: opacity 0.6s var(--ease-out), transform 0.8s var(--ease-out), visibility 0s linear 0.6s;
+}
+.fx__panel.is-on { opacity: 1; visibility: visible; transform: translateY(-50%); transition-delay: 0.08s, 0.08s, 0s; }
+.fx__panel .h1 { font-size: clamp(3rem, 7vw, 7rem); }
+.fx__tags { display: flex; gap: 8px; list-style: none; margin: var(--s-3) 0 0; padding: 0; flex-wrap: wrap; }
+.fx__tags li { padding: 8px 16px; border-radius: 9999px; border: 1.5px solid currentColor; font-weight: 700; font-size: 0.88rem; }
+.fx__dots {
+  position: absolute; left: 50%; bottom: 28px; transform: translateX(-50%);
+  display: flex; gap: 6px; list-style: none; margin: 0; padding: 6px;
+  border-radius: 9999px; background: rgba(20, 3, 6, 0.22);
+}
+.fx__dot {
+  border: 0; cursor: pointer; background: transparent;
+  padding: 8px 14px; border-radius: 9999px;
+  font-weight: 700; font-size: 0.82rem; opacity: 0.7;
+  transition: background-color 0.3s, color 0.3s, opacity 0.3s;
+}
+.fx__dot:hover { opacity: 1; }
+.fx__dot[aria-pressed="true"] { background: var(--fg); opacity: 1; }
+
+.pick {
+  position: relative; z-index: 4;
+  min-height: 100vh; min-height: 100svh;
+  display: grid; align-content: center; justify-items: start; gap: var(--s-4);
+  padding: var(--s-6) 52vw var(--s-6) var(--gutter);
+  text-align: left;
+}
+.pick .pick__row { justify-content: flex-start; }
+@media (max-width: 720px) {
+  .pick { align-content: end; padding: 50svh var(--gutter) clamp(56px, 10vh, 110px); }
+}
+.pick .h1 { font-size: clamp(2.8rem, 7vw, 7rem); }
+.pick__row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.pick__swatch {
+  border: 0; cursor: pointer;
+  height: 52px; padding: 0 22px; border-radius: 9999px;
+  background: var(--sw); color: var(--sw-fg);
+  font-weight: 800;
+  box-shadow: 0 0 0 2px rgba(255, 244, 232, 0.6), 0 10px 24px rgba(0, 0, 0, 0.25);
+  transition: transform 0.35s var(--ease-spring);
+}
+.pick__swatch:hover { transform: translateY(-3px); }
+.pick__swatch:active { transform: scale(0.96); }
+
+/* ---------- moments ---------- */
+.mo { position: relative; display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); }
+.mo__bottle {
+  position: sticky; top: 0; height: 100vh; height: 100svh;
+  display: grid; place-items: center; z-index: 3;
+}
+.bottle { height: min(78vh, 680px); width: auto; overflow: visible; filter: drop-shadow(0 30px 50px rgba(0, 0, 0, 0.25)); }
+.bottle__lines path {
+  stroke: var(--fg); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 1; stroke-dashoffset: 1;
+  transition: stroke 0.6s var(--ease-out);
+}
+.bottle__lines .flute { stroke-width: 1.2; opacity: 0.6; }
+.bottle__liquid { transform: translate3d(0, 640px, 0); will-change: transform; }
+.bottle__wave { fill: #2a0705; animation: wave 3.2s linear infinite; }
+@keyframes wave { from { transform: translateX(0); } to { transform: translateX(-80px); } }
+.bottle__bubble { fill: rgba(255, 244, 232, 0.55); animation: rise 4s linear infinite; }
+.bottle__bubble:nth-child(3) { animation-duration: 5.2s; animation-delay: -1s; }
+.bottle__bubble:nth-child(4) { animation-duration: 3.4s; animation-delay: -2s; }
+.bottle__bubble:nth-child(5) { animation-duration: 6s; animation-delay: -3s; }
+.bottle__bubble:nth-child(6) { animation-duration: 4.6s; animation-delay: -0.5s; }
+@keyframes rise { from { transform: translateY(260px); opacity: 0; } 20% { opacity: 1; } to { transform: translateY(-40px); opacity: 0; } }
+
+/* bottle details */
+.bottle__shadow { fill: rgba(0, 0, 0, 0.22); filter: blur(4px); }
+.bottle__foam { fill: #ead8c2; opacity: 0.9; animation: wave 3.2s linear infinite; }
+.bottle__shine { fill: none; stroke: rgba(255, 255, 255, 0.55); stroke-width: 5; stroke-linecap: round; }
+.bottle__shine--thin { stroke-width: 2.5; stroke: rgba(255, 255, 255, 0.4); }
+.bottle__script {
+  font-family: var(--f-script); font-size: 36px;
+  fill: var(--fg); opacity: calc(var(--script, 0) * 0.9);
+  transition: fill 0.6s var(--ease-out);
+}
+.bottle__cap { opacity: var(--cap, 0); transform-box: fill-box; transform-origin: 50% 100%; transition: transform 0.9s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.9s ease; }
+.bottle__cap-skirt { fill: #d8000c; stroke: #7a0008; stroke-width: 1; stroke-linejoin: round; }
+.bottle__cap-top { fill: #ff2a36; }
+.bottle__cap-shine { fill: rgba(255, 255, 255, 0.45); }
+.is-popped .bottle__cap { transform: translate(34px, -120px) rotate(-160deg); opacity: 0; }
+
+/* the finale */
+.mo__bottle { overflow: visible; }
+.mo__bottle .bottle { transform-origin: 50% 100%; transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1); }
+.mo__bottle.is-finale .bottle { transform: translateY(4%) scale(0.8); }
+.mo__cheers {
+  position: absolute; left: 50%; top: 6%;
+  transform: translate(-50%, 16px) scale(0.92);
+  text-align: center; pointer-events: none;
+  opacity: 0; transition: opacity 0.6s var(--ease-out), transform 0.9s var(--ease-out);
+  z-index: 5;
+}
+.mo__cheers.is-on { opacity: 1; transform: translate(-50%, 0) scale(1); transition-delay: 0.25s; }
+.mo__cheers-word { font-size: clamp(4rem, 9vw, 8rem); line-height: 0.9; margin: 0; text-shadow: 0 8px 30px rgba(0, 0, 0, 0.25); }
+.mo__cheers-line { margin: 6px 0 0; font-weight: 800; font-size: 1.05rem; letter-spacing: 0.02em; }
+.mo__burst { position: absolute; inset: 0; pointer-events: none; overflow: visible; z-index: 4; }
+.mo__fizz, .mo__confetti { position: absolute; left: 0; top: 0; will-change: transform, opacity; }
+.mo__fizz { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid rgba(255, 255, 255, 0.85); background: rgba(255, 255, 255, 0.15); }
+.mo__confetti { width: 8px; height: 13px; border-radius: 2px; }
+
+/* moments: supporting line and the year rail */
+.mo__line { margin-top: 2px; max-width: 34ch; }
+.mo__rail {
+  position: fixed; right: 22px; top: 50%; transform: translateY(-50%);
+  display: flex; flex-direction: column; gap: 6px; z-index: 30;
+}
+.mo__dot {
+  display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+  border: 0; background: transparent; cursor: pointer; padding: 4px 0;
+  color: var(--fg); opacity: 0.55;
+  font-family: var(--f-mono); font-size: 0.7rem; letter-spacing: 0.12em;
+  transition: opacity 0.3s;
+}
+.mo__dot-year { opacity: 0; transform: translateX(6px); transition: opacity 0.3s, transform 0.3s var(--ease-out); }
+.mo__dot:hover .mo__dot-year, .mo__dot.is-on .mo__dot-year { opacity: 1; transform: none; }
+.mo__dot-pip { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid currentColor; transition: background-color 0.3s, transform 0.3s var(--ease-out); }
+.mo__dot.is-past .mo__dot-pip { background: currentColor; }
+.mo__dot.is-on { opacity: 1; }
+.mo__dot.is-on .mo__dot-pip { background: currentColor; transform: scale(1.5); }
+
+.mo__list { list-style: none; margin: 0; padding: 0 var(--gutter) 0 0; position: relative; z-index: 4; overflow-x: clip; }
+.mo__item {
+  min-height: 100vh; min-height: 100svh;
+  display: grid; align-content: center; gap: var(--s-2);
+  position: relative;
+}
+.mo__year { font-size: clamp(5rem, 15vw, 15rem); will-change: transform; }
+.mo__item .h2 { max-width: 14ch; font-size: clamp(2.2rem, 4.6vw, 4.4rem); }
+.mo__script { display: block; font-size: 1.5em; line-height: 1; }
+.mo__cta { justify-self: start; margin-top: var(--s-3); }
+
+
+/* ---------- again ---------- */
+.ag { height: 480vh; }
+.ag__ring {
+  position: absolute; left: 50%; top: 50%;
+  width: min(70vmin, 680px); height: min(70vmin, 680px);
+  transform: translate(-50%, -50%) rotate(-90deg);
+  z-index: 2; overflow: visible;
+}
+.ag__track { fill: none; stroke: color-mix(in srgb, var(--fg) 28%, transparent); stroke-width: 0.6; stroke-dasharray: 1.4 2.2; }
+.ag__progress { fill: none; stroke: var(--fg); stroke-width: 1.4; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
+.ag__beats { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; pointer-events: none; }
+.ag__beat {
+  grid-area: 1 / 1; width: min(44vmin, 26rem);
+  opacity: 0; transform: translateY(18px) scale(0.98);
+  transition: opacity 0.5s var(--ease-out), transform 0.7s var(--ease-out);
+}
+.ag__beat.is-on { opacity: 1; transform: none; }
+.ag__beat .h1 { font-size: clamp(2rem, 4.2vw, 4rem); }
+.ag__beat .line { margin: var(--s-2) auto 0; }
+.ag__script { font-size: clamp(4rem, 10vw, 9rem); font-variation-settings: normal; }
+.ag__close { min-height: 90vh; }
+
+/* ---------- phones ---------- */
+@media (max-width: 720px) {
+  .fx__copy, .fx__stage[data-side] .fx__copy {
+    left: var(--gutter); right: var(--gutter); width: auto;
+    top: auto; bottom: 96px; transform: none; height: 13rem;
+  }
+  .fx__panel { top: auto; bottom: 0; transform: translateY(12px); }
+  .fx__panel.is-on { transform: none; }
+  .fx__panel .h1 { font-size: clamp(2.4rem, 11vw, 3.4rem); }
+  .fx__dots { bottom: 20px; width: calc(100vw - 32px); justify-content: space-between; }
+  .fx__dot { padding: 8px 8px; font-size: 0.74rem; }
+
+  .mo { grid-template-columns: 1fr; }
+  .mo__bottle { position: fixed; inset: 0; height: 100svh; opacity: 0.35; z-index: 1; pointer-events: none; }
+  .mo__list { padding: 0 var(--gutter); }
+  .mo__rail { display: none; }
+  .mo__bottle { transition: opacity 0.6s var(--ease-out); }
+  .mo__bottle.is-finale { opacity: 1; }
+  .mo__cheers { top: 18%; }
+  .mo__year { font-size: clamp(4.4rem, 26vw, 8rem); }
+
+  .ag__beat { width: min(62vmin, 20rem); }
+  .ag__beat .h1 { font-size: clamp(1.9rem, 8vw, 2.6rem); }
+  .ag__beat .line { font-size: 0.98rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx, .ag { height: auto; }
+  .fx__panel:first-child, .ag__beat { opacity: 1; visibility: visible; }
+  .ag__beats { position: relative; display: grid; gap: var(--s-4); padding: var(--s-6) 0; }
+  .ag__beat { grid-area: auto; }
+  .bottle__lines path { stroke-dashoffset: 0; }
+}

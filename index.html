@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Qurn Cola · Feel the Fizz</title>
+  <meta name="description" content="Qurn Cola, a fictional cola made with qurn. Ice cold, scroll to open.">
+  <meta name="theme-color" content="#e4000f">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%23e4000f%27/%3E%3Ctext x=%2716%27 y=%2723%27 font-size=%2720%27 font-family=%27Georgia,serif%27 font-style=%27italic%27 text-anchor=%27middle%27 fill=%27white%27%3EC%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=JetBrains+Mono:wght@500&family=Yellowtail&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/home.css">
+</head>
+<body class="page-home">
+  <a class="sr-only" href="#main">Skip to content</a>
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+  <canvas id="stage" aria-hidden="true"></canvas>
+  <div class="poster-can" aria-hidden="true"></div>
+
+  <nav class="nav" aria-label="Main">
+    <a class="nav__mark" href="index.html" aria-label="Qurn Cola home">Qurn Cola</a>
+    <ul class="nav__links">
+      <li><a href="index.html" aria-current="page">Home</a></li>
+      <li><a href="flavours.html">Flavours</a></li>
+      <li><a href="moments.html">Moments</a></li>
+      <li><a href="again.html">Again</a></li>
+    </ul>
+  </nav>
+
+  <p class="hud hud--bl micro" aria-hidden="true">Served ice cold</p>
+  <p class="hud hud--br micro" aria-hidden="true"><span id="hud-flavour">Original</span></p>
+  <p class="hud hud--edge micro" aria-hidden="true">Cold. Loud. Qurn.</p>
+
+  <main id="main">
+    <!-- 1 hero -->
+    <section class="scene scene--hero" id="hero" data-bg="#e4000f">
+      <div class="sticky">
+        <div class="layer-back" aria-hidden="true">
+          <div class="hero__ghost">
+            <span class="mega outline" data-drift="-1">QURN</span>
+            <span class="mega outline" data-drift="1">COLA</span>
+          </div>
+        </div>
+        <div class="layer-front hero__copy">
+          <h1 class="h1 reveal-words">Feel the fizz.</h1>
+          <div class="hero__cta reveal">
+            <a class="btn btn--cream" href="flavours.html">Pick your flavour <span class="btn__arrow" aria-hidden="true">&#8599;</span></a>
+          </div>
+        </div>
+        <p class="hero__scroll micro layer-front" aria-hidden="true"><span></span>Scroll</p>
+      </div>
+    </section>
+
+
+    <!-- 3 flavours -->
+    <section class="scene scene--flavours" id="flavours">
+      <div class="sticky">
+        <div class="layer-back" aria-hidden="true">
+          <div class="fl__names" id="fl-names"></div>
+        </div>
+        <div class="layer-front fl__copy">
+          <h2 class="sr-only">Four ways to feel the fizz</h2>
+          <p class="fl__line" id="fl-line" aria-live="polite"></p>
+          <ul class="fl__tags" id="fl-tags"></ul>
+        </div>
+        <div class="layer-front fl__picker" role="group" aria-label="Choose a flavour" id="fl-picker"></div>
+      </div>
+    </section>
+
+    <!-- 4 ice -->
+    <section class="scene scene--ice" id="ice" data-bg="#7a0008">
+      <div class="sticky">
+        <div class="ice__mist" aria-hidden="true"></div>
+        <div class="layer-front ice__copy">
+          <h2 class="h1 reveal-words">Colder hits different.</h2>
+          <p class="line reveal">Straight from the ice, beads running down the side.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5 share -->
+    <section class="scene scene--share" id="share" data-bg="#e4000f">
+      <div class="sticky">
+        <div class="layer-front share__copy">
+          <h2 class="h2"><span class="script share__script">Share a Qurn</span> with</h2>
+          <form class="share__form" id="share-form" autocomplete="off">
+            <label class="sr-only" for="share-name">A name for the can</label>
+            <input class="share__input" id="share-name" name="name" type="text" maxlength="12" placeholder="a name" spellcheck="false" inputmode="text">
+            <button class="btn btn--cream" type="submit">Print it <span class="btn__arrow" aria-hidden="true">&#8599;</span></button>
+          </form>
+          <p class="micro share__hint" id="share-hint">Letters only. Watch the can.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 close -->
+    <section class="scene scene--close" id="close" data-bg="#e4000f">
+      <div class="sticky">
+        <div class="close__glow" aria-hidden="true"></div>
+        <div class="layer-front close__copy">
+          <h2 class="h1 reveal-words">Grab one cold.</h2>
+          <div class="close__ctas reveal">
+            <a class="btn btn--cream" href="flavours.html">See the flavours <span class="btn__arrow" aria-hidden="true">&#8599;</span></a>
+            <a class="btn btn--ghost" href="moments.html">Our moments</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p class="footer__big" aria-hidden="true">Qurn Cola</p>
+    <div class="footer__row">
+      <ul class="footer__links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="flavours.html">Flavours</a></li>
+        <li><a href="moments.html">Moments</a></li>
+        <li><a href="again.html">Again</a></li>
+      </ul>
+      <p class="footer__legal">Qurn Cola is a fictional brand. Designed, built and tested end to end with qurn skills. Made by Panther.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+  <script src="https://unpkg.com/three@0.147.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/three@0.147.0/examples/js/loaders/RGBELoader.js"></script>
+  <script src="assets/js/hdr-studio.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/can3d.js"></script>
+  <script src="assets/js/common.js"></script>
+  <script src="assets/js/lanyard.js"></script>
+  <script src="assets/js/home.js"></script>
+</body>
+</html>

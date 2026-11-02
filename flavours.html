@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flavours · Qurn Cola</title>
+  <meta name="description" content="Qurn Cola, a fictional cola made with qurn. Four cans, one feeling.">
+  <meta name="theme-color" content="#e4000f">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%23e4000f%27/%3E%3Ctext x=%2716%27 y=%2723%27 font-size=%2720%27 font-family=%27Georgia,serif%27 font-style=%27italic%27 text-anchor=%27middle%27 fill=%27white%27%3EC%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=JetBrains+Mono:wght@500&family=Yellowtail&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/pages.css">
+</head>
+<body class="page-flavours">
+  <a class="sr-only" href="#main">Skip to content</a>
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+  <canvas id="stage" aria-hidden="true"></canvas>
+  <div class="poster-can" aria-hidden="true"></div>
+
+  <nav class="nav" aria-label="Main">
+    <a class="nav__mark" href="index.html" aria-label="Qurn Cola home">Qurn Cola</a>
+    <ul class="nav__links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="flavours.html" aria-current="page">Flavours</a></li>
+      <li><a href="moments.html">Moments</a></li>
+      <li><a href="again.html">Again</a></li>
+    </ul>
+  </nav>
+
+  <p class="hud hud--bl micro" aria-hidden="true">Pick one. Or all four.</p>
+  <p class="hud hud--edge micro" aria-hidden="true">Four cans, one feeling</p>
+
+  <main id="main">
+    <h1 class="sr-only">Flavours</h1>
+    <section class="scene fx" id="fx">
+      <div class="sticky fx__stage" id="fx-stage" data-side="right">
+        <div class="layer-back fx__ghosts" id="fx-ghosts" aria-hidden="true"></div>
+        <div class="layer-front fx__copy" id="fx-copy" aria-live="polite"></div>
+        <ol class="layer-front fx__dots" id="fx-dots" aria-label="Flavours"></ol>
+      </div>
+    </section>
+
+    <section class="pick" id="pick" data-bg="#e4000f">
+      <h2 class="h1 reveal-words">Which one tonight?</h2>
+      <div class="pick__row reveal" id="pick-row" role="group" aria-label="Spin to a flavour"></div>
+      <a class="btn btn--cream reveal" href="index.html#share">Put a name on it <span class="btn__arrow" aria-hidden="true">&#8599;</span></a>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p class="footer__big" aria-hidden="true">Qurn Cola</p>
+    <div class="footer__row">
+      <ul class="footer__links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="flavours.html">Flavours</a></li>
+        <li><a href="moments.html">Moments</a></li>
+        <li><a href="again.html">Again</a></li>
+      </ul>
+      <p class="footer__legal">Qurn Cola is a fictional brand. Designed, built and tested end to end with qurn skills. Made by Panther.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+  <script src="https://unpkg.com/three@0.147.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/three@0.147.0/examples/js/loaders/RGBELoader.js"></script>
+  <script src="assets/js/hdr-studio.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/can3d.js"></script>
+  <script src="assets/js/common.js"></script>
+  <script src="assets/js/lanyard.js"></script>
+  <script src="assets/js/flavours.js"></script>
+</body>
+</html>
