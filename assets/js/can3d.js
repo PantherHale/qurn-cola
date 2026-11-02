@@ -46,7 +46,7 @@
   renderer.setClearColor(0x000000, 0);
   var maxAniso = renderer.capabilities.getMaxAnisotropy();
   var bigTex = renderer.capabilities.maxTextureSize >= 8192 && window.innerWidth > 900;
-  var COLOR_SCALE = bigTex ? 1.5 : 1;   // 3072 x 1536 colour map on desktops
+  var COLOR_SCALE = 1;   // 2048 px label: half the wrap is ever on screen, so 1024 px of print is already sharper than the display
 
   var scene = new THREE.Scene();
   var camera = new THREE.PerspectiveCamera(30, 1, 0.1, 200);
@@ -123,8 +123,10 @@
   }
 
   function loadHDR() {
-    if (!THREE.RGBELoader || !window.STUDIO_HDR) return;
-    new THREE.RGBELoader().setDataType(THREE.HalfFloatType).load(window.STUDIO_HDR, function (tex) {
+    // a plain binary .hdr fetch (1.6 MB, cached by the CDN) instead of a 2 MB base64 script the page had to parse
+    var url = window.STUDIO_HDR || "assets/hdr/studio_small_09_1k.hdr";
+    if (!THREE.RGBELoader) return;
+    new THREE.RGBELoader().setDataType(THREE.HalfFloatType).load(url, function (tex) {
       tex.mapping = THREE.EquirectangularReflectionMapping;
       envDomeMat.map = tex;
       envDomeMat.needsUpdate = true;
@@ -180,6 +182,27 @@
 
   // ---------- canvas helpers ----------
   function makeCanvas(w, h) { var c = document.createElement("canvas"); c.width = w; c.height = h; return c; }
+  // deferred detail maps: start as 2x2 placeholders, get their real pixels one job per task after first paint,
+  // so building the can never blocks scrolling or input (the same texture object is refilled: no shader recompile)
+  var jobs = [];
+  function later(fn) { jobs.push(fn); }
+  function pump() {
+    if (!jobs.length) return;
+    jobs.shift()();
+    setTimeout(pump, 30);
+  }
+  function slotTex(rgb, srgb, repeat) {
+    var c = makeCanvas(2, 2), g = c.getContext("2d");
+    g.fillStyle = "rgb(" + rgb + ")"; g.fillRect(0, 0, 2, 2);
+    var t = new THREE.CanvasTexture(c);
+    t.anisotropy = maxAniso;
+    if (repeat) t.wrapS = THREE.RepeatWrapping;
+    if (srgb) t.encoding = THREE.sRGBEncoding;
+    return t;
+  }
+  // WebGL2 textures have immutable storage, so free the 2x2 placeholder before uploading the full-size image
+  function fill(t, canvas) { t.dispose(); t.image = canvas; t.needsUpdate = true; }
+
   function tex(c, srgb) {
     var t = new THREE.CanvasTexture(c);
     t.anisotropy = maxAniso;
@@ -231,7 +254,7 @@
   })();
 
   function paintHeight() {
-    var c = makeCanvas(BASE_W, BASE_H), g = c.getContext("2d");
+    var c = makeCanvas(BASE_W, BASE_H), g = c.getContext("2d", RF);
     g.fillStyle = "#000"; g.fillRect(0, 0, BASE_W, BASE_H);
     mist.forEach(function (p) {
       g.fillStyle = "rgba(255,255,255,.18)";
@@ -269,25 +292,25 @@
   }
 
   // height -> tangent-space normal map (OpenGL convention, wraps horizontally)
+  var RF = { willReadFrequently: true };   // keep height maps CPU-side: reading a GPU canvas back stalls the page
   function heightToNormal(hc, strength) {
     var w = hc.width, h = hc.height;
-    var src = hc.getContext("2d").getImageData(0, 0, w, h).data;
+    var src = hc.getContext("2d", RF).getImageData(0, 0, w, h).data;
     var out = makeCanvas(w, h), og = out.getContext("2d");
     var img = og.createImageData(w, h), d = img.data;
-    function H(x, y) {
-      x = (x + w) % w; y = y < 0 ? 0 : y >= h ? h - 1 : y;
-      return src[(y * w + x) * 4] / 255;
-    }
+    var k = strength / 255, row = w * 4;
+    // tight loop: direct index maths, no per-pixel function calls (this ran ~10x slower before)
     for (var y = 0; y < h; y++) {
+      var up = (y > 0 ? y - 1 : 0) * row, dn = (y < h - 1 ? y + 1 : h - 1) * row, cur = y * row;
       for (var x = 0; x < w; x++) {
-        var dx = (H(x + 1, y) - H(x - 1, y)) * strength;
-        var dy = (H(x, y - 1) - H(x, y + 1)) * strength;
-        var nx = -dx, ny = -dy, nz = 1;
-        var l = Math.sqrt(nx * nx + ny * ny + 1);
-        var i = (y * w + x) * 4;
-        d[i] = (nx / l * 0.5 + 0.5) * 255;
-        d[i + 1] = (ny / l * 0.5 + 0.5) * 255;
-        d[i + 2] = (nz / l * 0.5 + 0.5) * 255;
+        var xl = (x === 0 ? w - 1 : x - 1) * 4, xr = (x === w - 1 ? 0 : x + 1) * 4, x4 = x * 4;
+        var nx = (src[cur + xl] - src[cur + xr]) * k;
+        var ny = (src[dn + x4] - src[up + x4]) * k;
+        var inv = 127.5 / Math.sqrt(nx * nx + ny * ny + 1);
+        var i = cur + x4;
+        d[i] = nx * inv + 127.5;
+        d[i + 1] = ny * inv + 127.5;
+        d[i + 2] = inv + 127.5;
         d[i + 3] = 255;
       }
     }
@@ -368,6 +391,19 @@
     }
   }
 
+  // one small print-grain tile, painted once and tiled across every label
+  var grain = null;
+  function grainTile() {
+    if (grain) return grain;
+    grain = makeCanvas(256, 256);
+    var g = grain.getContext("2d");
+    for (var n = 0; n < 1100; n++) {
+      g.fillStyle = rnd() > 0.5 ? "rgba(255,255,255,.035)" : "rgba(0,0,0,.05)";
+      g.fillRect(rnd() * 256, rnd() * 256, 1.5, 1.5);
+    }
+    return grain;
+  }
+
   // mode "color" paints the print; mode "metal" paints the same shapes as a metalness mask
   function paintLabel(f, name, mode) {
     var isColor = mode === "color";
@@ -399,10 +435,8 @@
 
     // print grain so the ink is not a flat fill
     if (isColor && !f.bare) {
-      for (var n = 0; n < 16000; n++) {
-        g.fillStyle = rnd() > 0.5 ? "rgba(255,255,255,.035)" : "rgba(0,0,0,.05)";
-        g.fillRect(rnd() * BASE_W, BAND_T + rnd() * (BAND_B - BAND_T), 1.5, 1.5);
-      }
+      g.fillStyle = g.createPattern(grainTile(), "repeat");
+      g.fillRect(0, BAND_T, BASE_W, BAND_B - BAND_T);
     }
 
     // ribbon
@@ -481,7 +515,7 @@
     if (isColor) {
       var caustic = f.bare || f.id === "zero" ? "rgba(255,255,255,.34)" : "rgba(255,235,230,.26)";
       drops.forEach(function (p) {
-        if (p.r < 2) return;
+        if (p.r < 3) return;
         eachWrapped(p.x, 24, function (dx) {
           var rx = p.r * p.sx, ry = p.r;
           g.save();
@@ -514,8 +548,10 @@
   }
 
   // ---------- materials ----------
-  var normalTex = tex(heightToNormal(paintHeight(), 6), false);
-  var roughTex = tex(paintRough(), false);
+  var normalTex = slotTex("128,128,255", false, true);
+  var roughTex = slotTex("60,60,60", false, true);
+  later(function () { fill(normalTex, heightToNormal(paintHeight(), 6)); });
+  later(function () { fill(roughTex, paintRough()); });
 
   var bodyMat = new THREE.MeshPhysicalMaterial({
     color: 0xffffff, metalness: 1, roughness: 1,
@@ -529,10 +565,11 @@
 
   // ---------- stamped lid, painted top-down (planar UVs), like a real 202 end ----------
   var LID_R = 2.42;
-  var lidMaps = (function () {
-    var S = 1536, k = S / (2 * LID_R), c = S / 2;
+  var lidMaps = { normal: slotTex("128,128,255"), rough: slotTex("80,80,80"), ao: slotTex("255,255,255", true) };
+  later(function () { var made = (function () {
+    var S = 1024, k = S / (2 * LID_R), c = S / 2;
     function P(x, z) { return [c + x * k, c + z * k]; }          // body-frame (x, z) -> canvas, seen from above
-    var hc = makeCanvas(S, S), h = hc.getContext("2d");
+    var hc = makeCanvas(S, S), h = hc.getContext("2d", RF);
     var rc = makeCanvas(S, S), r = rc.getContext("2d");
     h.fillStyle = "rgb(128,128,128)"; h.fillRect(0, 0, S, S);
     // satin base: smoother toward the centre, a touch rougher toward the bead, like a real spun end
@@ -633,14 +670,10 @@
       lens.addColorStop(0, "rgba(0,0,0,0)"); lens.addColorStop(0.8, "rgba(0,0,0,.03)"); lens.addColorStop(1, "rgba(0,0,0,.1)");
       o.fillStyle = lens; o.beginPath(); o.arc(pp[0], pp[1], pr, 0, TAU); o.fill();
     }
-    var ao = new THREE.CanvasTexture(cc);
-    ao.encoding = THREE.sRGBEncoding;
-
-    var nrm = new THREE.CanvasTexture(heightToNormal(hc, 4));
-    var rough = new THREE.CanvasTexture(rc);
-    nrm.anisotropy = rough.anisotropy = ao.anisotropy = maxAniso;
-    return { normal: nrm, rough: rough, ao: ao };
+    return { normal: heightToNormal(hc, 4), rough: rc, ao: cc };
   })();
+  fill(lidMaps.normal, made.normal); fill(lidMaps.rough, made.rough); fill(lidMaps.ao, made.ao);
+  });
   var lidMat = new THREE.MeshPhysicalMaterial({
     color: 0xf2f4f6, map: lidMaps.ao, metalness: 1, roughness: 0.8, roughnessMap: lidMaps.rough,
     normalMap: lidMaps.normal, normalScale: new THREE.Vector2(0.85, 0.85),
@@ -652,10 +685,13 @@
   });
 
   // tab: raised edge bead, stiffening rib, crisp finger-hole lip (painted in shape coordinates)
-  var tabNormal = (function () {
+  var tabNormal = slotTex("128,128,255");
+  tabNormal.repeat.set(1 / 1.3, 1 / 3.05);
+  tabNormal.offset.set(0.65 / 1.3, 0.9 / 3.05);
+  later(function () { fill(tabNormal, (function () {
     var W = 256, H = 640, sx = W / 1.3, sy = H / 3.05;
     function T(x, y) { return [(x + 0.65) * sx, H - (y + 0.9) * sy]; }
-    var hc = makeCanvas(W, H), g = hc.getContext("2d");
+    var hc = makeCanvas(W, H), g = hc.getContext("2d", RF);
     g.fillStyle = "rgb(110,110,110)"; g.fillRect(0, 0, W, H);
     function outline(inset) {
       var w = 0.6 - inset, L = 2.1 - inset, rr = 0.55 - inset * 0.5;
@@ -676,11 +712,8 @@
     var r1 = T(0, 0.75), r2 = T(0, 0.9);
     g.beginPath(); g.moveTo(r1[0], r1[1]); g.lineTo(r2[0], r2[1]); g.lineWidth = 0.08 * sx; g.lineCap = "round"; g.stroke();
     g.restore();
-    var t = new THREE.CanvasTexture(heightToNormal(hc, 5));
-    t.repeat.set(1 / 1.3, 1 / 3.05);
-    t.offset.set(0.65 / 1.3, 0.9 / 3.05);
-    return t;
-  })();
+    return heightToNormal(hc, 5);
+  })()); });
   var tabMat = new THREE.MeshPhysicalMaterial({
     color: 0xc2c6cc, metalness: 1, roughness: 0.24, envMapIntensity: 1.3,
     normalMap: tabNormal, normalScale: new THREE.Vector2(1, 1),
@@ -719,9 +752,10 @@
 
   // ---------- base dome: its own satin finish, stamped ring and the ink-jet batch code ----------
   var DOME_R = 2.47;
-  var domeMaps = (function () {
+  var domeMaps = { normal: slotTex("128,128,255"), rough: slotTex("60,60,60"), color: slotTex("255,255,255", true) };
+  later(function () { var made = (function () {
     var S = 1024, k = S / (2 * DOME_R), c = S / 2;
-    var hc = makeCanvas(S, S), h = hc.getContext("2d");
+    var hc = makeCanvas(S, S), h = hc.getContext("2d", RF);
     var rc = makeCanvas(S, S), r = rc.getContext("2d");
     var cc = makeCanvas(S, S), o = cc.getContext("2d");
     h.fillStyle = "rgb(128,128,128)"; h.fillRect(0, 0, S, S);
@@ -753,7 +787,7 @@
     h.beginPath(); h.arc(c, c, 0.98 * k, 0, TAU); h.stroke();
     // ink-jet date code: rendered small, then re-drawn dot by dot like a real printer
     var lines = ["BB 08 27  L4", "2617 12:45"];
-    var tc = makeCanvas(150, 40), t = tc.getContext("2d");
+    var tc = makeCanvas(150, 40), t = tc.getContext("2d", RF);
     t.fillStyle = "#000"; t.font = "700 15px monospace"; t.textBaseline = "top";
     t.fillText(lines[0], 2, 2); t.fillText(lines[1], 2, 21);
     var px = t.getImageData(0, 0, 150, 40).data, dot = 0.0105 * k, step = dot * 2.1;
@@ -764,11 +798,10 @@
         o.beginPath(); o.arc(ox + x * step / 2, oy + y * step / 2, dot, 0, TAU); o.fill();
       }
     }
-    var nrm = new THREE.CanvasTexture(heightToNormal(hc, 3.5)), rough = new THREE.CanvasTexture(rc), col = new THREE.CanvasTexture(cc);
-    col.encoding = THREE.sRGBEncoding;
-    nrm.anisotropy = rough.anisotropy = col.anisotropy = maxAniso;
-    return { normal: nrm, rough: rough, color: col };
+    return { normal: heightToNormal(hc, 3.5), rough: rc, color: cc };
   })();
+  fill(domeMaps.normal, made.normal); fill(domeMaps.rough, made.rough); fill(domeMaps.color, made.color);
+  });
   var domeMat = new THREE.MeshPhysicalMaterial({
     color: 0xcdd0d5, map: domeMaps.color, metalness: 1, roughness: 1, roughnessMap: domeMaps.rough,
     normalMap: domeMaps.normal, normalScale: new THREE.Vector2(0.8, 0.8),
@@ -988,7 +1021,7 @@
   function warmUp() {
     var idle = window.requestIdleCallback || function (fn) { return setTimeout(fn, 120); };
     fizz.visible = true; shadow.visible = true;
-    renderer.compile(scene, camera);
+    idle(function () { renderer.compile(scene, camera); });
     FL.forEach(function (f, i) {
       idle(function () {
         var t = flavourTextures(i, i === state.flavour ? state.name : "");
@@ -1111,19 +1144,24 @@
     pause: function (b) { paused = !!b; }
   };
 
-  applyFlavour();
+  // paint the label once, after the fonts arrive (or 1.5 s, whichever is first); the can waits hidden till then
+  can.visible = false;
+  rebuildEnv(FL[state.flavour].bg);
   loadHDR();
   requestAnimationFrame(frame);
+  setTimeout(pump, 60);
 
   var fontsWanted = ["400 80px Yellowtail", "900 80px Archivo", "800 80px Archivo", "500 20px 'JetBrains Mono'"];
-  window.CanScene.ready = (document.fonts && document.fonts.load
+  var fontsReady = document.fonts && document.fonts.load
     ? Promise.all(fontsWanted.map(function (f) { return document.fonts.load(f); }))
-    : Promise.resolve()
-  ).then(function () {
-    Object.keys(cache).forEach(function (k) { cache[k].map.dispose(); cache[k].metal.dispose(); delete cache[k]; });
+    : Promise.resolve();
+  var timeout = new Promise(function (r) { setTimeout(r, 1500); });
+  function reveal() {
     applyFlavour();
+    can.visible = true;
     html.classList.add("can-ready");
     warmUp();
     return true;
-  }).catch(function () { html.classList.add("can-ready"); return true; });
+  }
+  window.CanScene.ready = Promise.race([fontsReady, timeout]).then(reveal, reveal);
 })();
