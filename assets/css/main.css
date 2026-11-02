@@ -252,6 +252,26 @@ main { position: relative; }
 .footer__links a:hover { opacity: 1; text-decoration: underline; text-underline-offset: 4px; }
 .footer__legal { font-size: 0.82rem; opacity: 0.72; max-width: 60ch; margin: 0; }
 
+/* ---------- loading screen (covers the one-time GPU warm-up) ---------- */
+html.is-loading, html.is-loading body { overflow: hidden; }
+.loader {
+  position: fixed; inset: 0; z-index: 100;
+  display: grid; place-items: center; align-content: center; gap: 22px;
+  background: var(--red); color: var(--cream);
+  transition: opacity 0.6s var(--ease-out), visibility 0s linear 0.6s;
+}
+.loader.is-done { opacity: 0; visibility: hidden; pointer-events: none; }
+.loader__mark { font-family: var(--f-script); font-size: clamp(3rem, 9vw, 6rem); line-height: 1; margin: 0; }
+.loader__bar {
+  position: relative; width: min(220px, 50vw); height: 3px; border-radius: 3px; overflow: hidden;
+  background: rgba(255, 244, 232, 0.25);
+}
+.loader__bar::after {
+  content: ""; position: absolute; inset: 0; width: 40%; border-radius: inherit; background: var(--cream);
+  animation: loaderSlide 1.1s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+@keyframes loaderSlide { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+
 /* ---------- "Made By Panther" lanyard badge ---------- */
 .tag-rig {
   position: fixed; top: 0; left: 0; width: 0; height: 0; z-index: 45; pointer-events: none;

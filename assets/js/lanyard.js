@@ -228,6 +228,12 @@
   if (reduced) { anchor.y = anchorTarget.y; init(false); render(); }
   else {
     render();
-    setTimeout(wake, 650);   // let the hero settle, then let it fall
+    // drop in once the loading screen lifts (or shortly after load on pages without one)
+    var loaderEl = document.getElementById("loader");
+    if (loaderEl && !loaderEl.classList.contains("is-done")) {
+      window.addEventListener("loader:done", function () { setTimeout(wake, 300); });
+    } else {
+      setTimeout(wake, 650);
+    }
   }
 })();

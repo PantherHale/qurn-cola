@@ -271,10 +271,14 @@
     }
   });
 
-  // ---------- entrance ----------
-  var start = lerpPose(framesFor("hero"), 0);
-  Can.setPose(Object.assign({}, start, { y: start.y - 1.6, ry: start.ry - 2.2 }), true);
-  Can.setPose(start);
+  // ---------- entrance (replayed when the loading screen lifts, if we're still at the top) ----------
+  function entrance() {
+    var start = lerpPose(framesFor("hero"), 0);
+    Can.setPose(Object.assign({}, start, { y: start.y - 1.6, ry: start.ry - 2.2 }), true);
+    Can.setPose(start);
+  }
+  entrance();
+  window.addEventListener("loader:done", function () { if (window.scrollY < 10) entrance(); });
   showFlavour(0, false);
 
   window.addEventListener("resize", function () {

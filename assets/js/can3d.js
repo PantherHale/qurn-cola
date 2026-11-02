@@ -44,6 +44,9 @@
   renderer.toneMappingExposure = 0.88;
   renderer.physicallyCorrectLights = true;
   renderer.setClearColor(0x000000, 0);
+  // production: don't make the driver report every shader compile synchronously (that serialises
+  // first-visit compiles and froze Intel/D3D GPUs for ~1.5 s)
+  renderer.debug.checkShaderErrors = false;
   var maxAniso = renderer.capabilities.getMaxAnisotropy();
   var bigTex = renderer.capabilities.maxTextureSize >= 8192 && window.innerWidth > 900;
   var COLOR_SCALE = 1;   // 2048 px label: half the wrap is ever on screen, so 1024 px of print is already sharper than the display
@@ -117,7 +120,8 @@
     }
     return envCache[hex];
   }
-  function rebuildEnv(hex) { scene.environment = envFor(hex); }
+  // one shared environment: the per-flavour floor tint was barely visible but cost a full PMREM build each
+  function rebuildEnv() { scene.environment = envFor("#e4000f"); }
   function resetEnvCache() {
     Object.keys(envCache).forEach(function (k) { envCache[k].dispose(); delete envCache[k]; });
   }
@@ -674,15 +678,23 @@
   })();
   fill(lidMaps.normal, made.normal); fill(lidMaps.rough, made.rough); fill(lidMaps.ao, made.ao);
   });
-  var lidMat = new THREE.MeshPhysicalMaterial({
-    color: 0xf2f4f6, map: lidMaps.ao, metalness: 1, roughness: 0.8, roughnessMap: lidMaps.rough,
-    normalMap: lidMaps.normal, normalScale: new THREE.Vector2(0.85, 0.85),
-    clearcoat: 0.35, clearcoatRoughness: 0.18,
-    envMapIntensity: 1.6, side: THREE.DoubleSide
+  // every bare-metal part shares ONE shader program: same map slots (placeholders where a part has none),
+  // clearcoat on, double-sided. Five slightly different programs used to compile on first visit.
+  var WHITE_SRGB = slotTex("255,255,255", true), WHITE_LIN = slotTex("255,255,255"), FLAT_N = slotTex("128,128,255");
+  function metal(o) {
+    return new THREE.MeshPhysicalMaterial({
+      color: o.color, metalness: 1, roughness: o.roughness,
+      map: o.map || WHITE_SRGB, roughnessMap: o.roughnessMap || WHITE_LIN,
+      normalMap: o.normalMap || FLAT_N, normalScale: new THREE.Vector2(o.normalScale || 1, o.normalScale || 1),
+      clearcoat: o.clearcoat || 0.001, clearcoatRoughness: o.clearcoatRoughness || 0.2,
+      envMapIntensity: o.envMapIntensity || 1.3, side: THREE.DoubleSide
+    });
+  }
+  var lidMat = metal({
+    color: 0xf2f4f6, map: lidMaps.ao, roughness: 0.8, roughnessMap: lidMaps.rough,
+    normalMap: lidMaps.normal, normalScale: 0.85, clearcoat: 0.35, clearcoatRoughness: 0.18, envMapIntensity: 1.6
   });
-  var rimMat = new THREE.MeshPhysicalMaterial({
-    color: 0xdfe2e6, metalness: 1, roughness: 0.2, envMapIntensity: 1.4, side: THREE.DoubleSide
-  });
+  var rimMat = metal({ color: 0xdfe2e6, roughness: 0.2, envMapIntensity: 1.4 });
 
   // tab: raised edge bead, stiffening rib, crisp finger-hole lip (painted in shape coordinates)
   var tabNormal = slotTex("128,128,255");
@@ -714,11 +726,7 @@
     g.restore();
     return heightToNormal(hc, 5);
   })()); });
-  var tabMat = new THREE.MeshPhysicalMaterial({
-    color: 0xc2c6cc, metalness: 1, roughness: 0.24, envMapIntensity: 1.3,
-    normalMap: tabNormal, normalScale: new THREE.Vector2(1, 1),
-    clearcoat: 0.3, clearcoatRoughness: 0.2, side: THREE.DoubleSide
-  });
+  var tabMat = metal({ color: 0xc2c6cc, roughness: 0.24, normalMap: tabNormal, clearcoat: 0.3, envMapIntensity: 1.3 });
 
   var cache = {};
   function flavourTextures(i, name) {
@@ -802,10 +810,9 @@
   })();
   fill(domeMaps.normal, made.normal); fill(domeMaps.rough, made.rough); fill(domeMaps.color, made.color);
   });
-  var domeMat = new THREE.MeshPhysicalMaterial({
-    color: 0xcdd0d5, map: domeMaps.color, metalness: 1, roughness: 1, roughnessMap: domeMaps.rough,
-    normalMap: domeMaps.normal, normalScale: new THREE.Vector2(0.8, 0.8),
-    envMapIntensity: 1.25, side: THREE.DoubleSide
+  var domeMat = metal({
+    color: 0xcdd0d5, map: domeMaps.color, roughness: 1, roughnessMap: domeMaps.rough,
+    normalMap: domeMaps.normal, normalScale: 0.8, envMapIntensity: 1.25
   });
   var domeGeo = new THREE.LatheGeometry(
     new THREE.CatmullRomCurve3(domeCtrl, false, "centripetal").getSpacedPoints(140)
@@ -832,7 +839,7 @@
   // the countersink channel sits in shadow on a real can: a soft dark ring at its floor
   var channel = new THREE.Mesh(
     new THREE.TorusGeometry(2.5, 0.05, 12, 160),
-    new THREE.MeshStandardMaterial({ color: 0x3a3d41, metalness: 0.9, roughness: 0.55 })
+    metal({ color: 0x3a3d41, roughness: 0.55 })
   );
   channel.rotation.x = Math.PI / 2;
   channel.position.y = 10.99;
@@ -1026,7 +1033,6 @@
       idle(function () {
         var t = flavourTextures(i, i === state.flavour ? state.name : "");
         if (renderer.initTexture) { renderer.initTexture(t.map); renderer.initTexture(t.metal); }
-        envFor(f.bg);
       });
     });
   }
@@ -1149,7 +1155,7 @@
   rebuildEnv(FL[state.flavour].bg);
   loadHDR();
   requestAnimationFrame(frame);
-  setTimeout(pump, 60);
+  setTimeout(pump, 0);
 
   var fontsWanted = ["400 80px Yellowtail", "900 80px Archivo", "800 80px Archivo", "500 20px 'JetBrains Mono'"];
   var fontsReady = document.fonts && document.fonts.load
@@ -1160,8 +1166,26 @@
     applyFlavour();
     can.visible = true;
     html.classList.add("can-ready");
-    warmUp();
+    warmAll();
     return true;
+  }
+  // behind the loading screen: finish every detail map, paint and upload every flavour, compile every
+  // shader, render twice, then announce "can:warm" so the loader can lift onto a fully warm page
+  function warmAll() {
+    var steps = jobs.splice(0);
+    FL.forEach(function (_, i) {
+      steps.push(function () {
+        var t = flavourTextures(i, i === state.flavour ? state.name : "");
+        if (renderer.initTexture) { renderer.initTexture(t.map); renderer.initTexture(t.metal); }
+      });
+    });
+    steps.push(function () { fizz.visible = true; shadow.visible = true; renderer.compile(scene, camera); });
+    steps.push(function () { renderer.render(scene, camera); });   // first real draw happens here, not after the reveal
+    (function next() {
+      if (steps.length) { steps.shift()(); setTimeout(next, 0); return; }
+      html.classList.add("can-warm");
+      window.dispatchEvent(new Event("can:warm"));
+    })();
   }
   window.CanScene.ready = Promise.race([fontsReady, timeout]).then(reveal, reveal);
 })();

@@ -6,6 +6,27 @@
 
   if (window.gsap && window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
 
+  // loading screen: covers the one-time GPU warm-up so nobody scrolls into a stutter
+  var loader = document.getElementById("loader");
+  var loaderDone = false;
+  function liftLoader() {
+    if (loaderDone || !loader) return;
+    loaderDone = true;
+    loader.classList.add("is-done");
+    document.documentElement.classList.remove("is-loading");
+    if (window.QURN && window.QURN.lenis) window.QURN.lenis.start();
+    window.dispatchEvent(new Event("loader:done"));
+  }
+  if (loader) {
+    if (!window.CanScene || !window.CanScene.live) {
+      setTimeout(liftLoader, 300);
+    } else {
+      window.addEventListener("can:warm", liftLoader);
+      if (document.documentElement.classList.contains("can-warm")) setTimeout(liftLoader, 0);
+      setTimeout(liftLoader, 6000);
+    }
+  }
+
   // smooth scroll (off for reduced motion and touch)
   if (!reduced && !coarse && window.Lenis && window.gsap) {
     var lenis = new Lenis({ lerp: 0.1, wheelMultiplier: 0.9 });
@@ -13,6 +34,7 @@
     lenis.on("scroll", ScrollTrigger.update);
     gsap.ticker.add(function (t) { lenis.raf(t * 1000); });
     gsap.ticker.lagSmoothing(0);
+    if (loader && !loaderDone) lenis.stop();
   }
 
   // split headings into words that rise in
