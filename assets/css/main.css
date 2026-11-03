@@ -1,4 +1,6 @@
 :root {
+  /* designed light-only: stops phone browsers (Chrome auto-dark, Samsung dark mode) from re-colouring the page */
+  color-scheme: only light;
   --red: #e4000f;
   --red-hot: #ff1a2a;
   --deep: #7a0008;
