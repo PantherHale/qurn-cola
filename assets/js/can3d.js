@@ -44,7 +44,9 @@
     } catch (e) { return false; }
   })();
   html.classList.toggle("lowgpu", lowGPU);
-  var DPR_CAP = lowGPU ? 1.25 : 2;
+  // phones render far fewer pixels, so they keep a sharp 2x even on mobile GPUs (1.25x on a 3x screen looked jagged)
+  var smallScreen = Math.min(window.innerWidth, window.innerHeight) < 600;
+  var DPR_CAP = lowGPU && !smallScreen ? 1.25 : 2;
 
   // ---------- renderer ----------
   var renderer;
@@ -1095,7 +1097,7 @@
     if (!idleNow) adaptDpr(raw);                              // half-rate idle frames are slow on purpose; don't punish them
     var dt = Math.min(raw, 0.05);
     var t = clock.elapsedTime;
-    var k = 1 - Math.pow(0.0008, dt);
+    var k = 1 - Math.pow(smallScreen ? 0.03 : 0.0008, dt);   // phones: a softer, slower glide between poses
     Object.keys(pose).forEach(function (p) { pose[p] += (target[p] - pose[p]) * k; });
     wet += (wetTarget - wet) * k;
     tabT += (tabTarget - tabT) * (1 - Math.pow(0.002, dt));

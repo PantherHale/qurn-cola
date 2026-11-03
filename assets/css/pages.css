@@ -184,14 +184,34 @@
   .fx__dots { bottom: 20px; width: calc(100vw - 32px); justify-content: space-between; }
   .fx__dot { padding: 8px 8px; font-size: 0.74rem; }
 
+  /* phones: ~45% more scroll per scene so nothing feels rushed */
+  .fx { height: 760vh; }
+  .ag { height: 700vh; }
+  .mo__item { min-height: 115svh; }
+
+  /* phones: the bottle becomes a small fill-meter in the corner, never behind the words */
   .mo { grid-template-columns: 1fr; }
-  .mo__bottle { position: fixed; inset: 0; height: 100svh; opacity: 0.35; z-index: 1; pointer-events: none; }
-  .mo__list { padding: 0 var(--gutter); }
+  .mo__bottle {
+    position: fixed; inset: auto 10px 14px auto; width: 78px; height: 208px;
+    display: block; z-index: 6; pointer-events: none;
+  }
+  .mo__bottle .bottle { width: 100%; height: 100%; filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.25)); }
+  .mo__bottle.is-finale .bottle { transform: none; }
+  .mo__list { padding: 0 104px 0 var(--gutter); }
+  .mo__item .h2 { font-size: clamp(1.8rem, 8vw, 2.6rem); max-width: none; }
+  .mo__line { font-size: 1rem; }
   .mo__rail { display: none; }
-  .mo__bottle { transition: opacity 0.6s var(--ease-out); }
-  .mo__bottle.is-finale { opacity: 1; }
-  .mo__cheers { top: 18%; }
-  .mo__year { font-size: clamp(4.4rem, 26vw, 8rem); }
+  .mo__year { font-size: clamp(3.6rem, 19vw, 6rem); }
+  /* phones: the cheers card sits low and solid, clear of the headline above and the bottle beside it */
+  .mo__cheers {
+    position: fixed; left: 16px; right: 104px; top: auto; bottom: 28px;
+    transform: translateY(12px) scale(0.96); transform-origin: bottom left;
+    padding: 14px 16px 16px; border-radius: 22px; white-space: normal;
+    background: #2a0508; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  }
+  .mo__cheers.is-on { transform: none; }
+  .mo__cheers-word { font-size: 3.2rem; }
+  .mo__cheers-line { font-size: 0.9rem; }
 
   .ag__beat { width: min(62vmin, 20rem); }
   .ag__beat .h1 { font-size: clamp(1.9rem, 8vw, 2.6rem); }

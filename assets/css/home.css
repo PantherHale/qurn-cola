@@ -130,6 +130,12 @@
 
 /* phones: the can sits up top, copy sits below it */
 @media (max-width: 720px) {
+  /* a phone screen is short, so each scene gets ~45% more scroll: a thumb flick no longer rushes it */
+  .scene--hero { height: 260vh; }
+  .scene--flavours { height: 520vh; }
+  .scene--ice { height: 200vh; }
+  .scene--share { height: 190vh; }
+  .scene--close { height: 160vh; }
   .hero__copy { max-width: none; right: var(--gutter); bottom: 64px; }
   .hero__scroll { display: none; }
   .fl__copy { bottom: 116px; right: var(--gutter); max-width: none; }

@@ -253,6 +253,13 @@ main { position: relative; }
 .footer__links a:hover { opacity: 1; text-decoration: underline; text-underline-offset: 4px; }
 .footer__legal { font-size: 0.82rem; opacity: 0.72; max-width: 60ch; margin: 0; }
 
+/* phones: slower, calmer reveals */
+@media (max-width: 720px) {
+  .reveal { transition-duration: 1s; }
+  .reveal-words .w > span { transition-duration: 1.2s; transition-delay: calc(var(--i) * 90ms); }
+  html .tag-rig { z-index: 35; }   /* the badge always hangs under the nav, never over its links */
+}
+
 /* integrated GPUs: drop the full-screen grain blend (one less full-screen layer every frame) */
 html.lowgpu .grain { display: none; }
 
@@ -342,11 +349,12 @@ html.is-loading, html.is-loading body { overflow: hidden; }
   mix-blend-mode: soft-light;
 }
 @media (max-width: 720px) {
-  .tag-card { padding: 24px 10px 10px; border-radius: 11px; gap: 2px; }
-  .tag-card__slot { top: 10px; width: 26px; height: 6px; }
-  .tag-card__kicker { font-size: 7px; margin-top: 4px; }
-  .tag-card__bars { height: 12px; }
-  .tag-strap__text { font-size: 6.5px; }
+  .tag-card { padding: 18px 8px 8px; border-radius: 9px; gap: 1px; }
+  .tag-card__slot { top: 7px; width: 20px; height: 5px; }
+  .tag-card__kicker { font-size: 6px; margin-top: 3px; }
+  .tag-card__rule { width: 22px; margin: 4px 0 1px; }
+  .tag-card__bars { height: 9px; }
+  .tag-strap__text { font-size: 5.5px; }
 }
 
 /* ---------- responsive ---------- */

@@ -80,7 +80,7 @@
     var x = sideX(i) + (last ? 0 : (sideX(i + 1) - sideX(i)) * spinT);
     var n = narrow();
     Can.setPose({
-      x: x, y: n ? 0.3 : -0.02, s: n ? 0.72 : 1.12,
+      x: x, y: n ? 0.14 : -0.02, s: n ? 0.98 : 1.12,
       rx: 0.08, ry: ry, rz: (i % 2 === 0 ? -0.12 : 0.12) * (1 - spinT) + (i % 2 === 0 ? 0.12 : -0.12) * spinT
     });
     Can.setTab(0);

@@ -40,13 +40,13 @@
 
   function measure() {
     var small = window.innerWidth <= 720;
-    cardW = small ? 92 : 132;
-    cardH = small ? 132 : 188;
-    segLen = small ? 13 : 32;
-    bandW = small ? 11 : 15;
+    cardW = small ? 70 : 132;
+    cardH = small ? 100 : 188;
+    segLen = small ? 11 : 32;
+    bandW = small ? 9 : 15;
     rig.style.setProperty("--tag-w", cardW + "px");
     rig.style.setProperty("--tag-h", cardH + "px");
-    anchorTarget.x = window.innerWidth - (small ? 64 : 118);
+    anchorTarget.x = window.innerWidth - (small ? 52 : 118);
     anchorTarget.y = restY();
     restLen = segLen;
     sizeStrapLayer();
@@ -210,8 +210,9 @@
 
   // the badge always hangs in view (operator 2026-11-02); scrolling only gives it a gentle sway
   var lastScroll = window.scrollY, swayAt = 0;
+  var coarse = window.matchMedia("(pointer: coarse)").matches;
   window.addEventListener("scroll", function () {
-    if (reduced) return;
+    if (reduced || coarse) return;                            // phones: no scroll sway (a thumb flick flung it over the nav)
     var y = window.scrollY, d = y - lastScroll;
     lastScroll = y;
     var now = performance.now();
