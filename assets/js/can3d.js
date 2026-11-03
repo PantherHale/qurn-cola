@@ -33,12 +33,25 @@
   function yPx(y) { return BASE_H - (y / CAN_TOP) * BASE_H; }
   var BAND_T = yPx(BAND_Y1), BAND_B = yPx(BAND_Y0), BAND_MID = (BAND_T + BAND_B) / 2;
 
+  // ---------- GPU tier: integrated / mobile GPUs get no MSAA, a lower pixel cap and lighter geometry ----------
+  var lowGPU = (function () {
+    try {
+      var gl = probe.getContext("webgl2") || probe.getContext("webgl");
+      var ext = gl && gl.getExtension("WEBGL_debug_renderer_info");
+      var name = ext ? String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)) : "";
+      return /intel|iris|uhd|hd graphics|mali|adreno|powervr|swiftshader|llvmpipe|basic render/i.test(name) ||
+        (navigator.hardwareConcurrency || 8) <= 4;
+    } catch (e) { return false; }
+  })();
+  html.classList.toggle("lowgpu", lowGPU);
+  var DPR_CAP = lowGPU ? 1.25 : 2;
+
   // ---------- renderer ----------
   var renderer;
   try {
-    renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
+    renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: !lowGPU, alpha: true, powerPreference: "high-performance" });
   } catch (e) { noWebGL(); return; }
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, DPR_CAP));
   renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 0.88;
@@ -165,7 +178,7 @@
     C(1.75, 0.72), C(1.95, 0.6), C(2.15, 0.42), C(2.3, 0.24), C(2.39, 0.1), C(2.44, 0.025), C(2.47, 0.0)
   ];
   var wallCurve = new THREE.CatmullRomCurve3(wallCtrl, false, "centripetal");
-  var wallPts = wallCurve.getSpacedPoints(520).map(function (p) {
+  var wallPts = wallCurve.getSpacedPoints(lowGPU ? 320 : 520).map(function (p) {
     var x = p.x;
     // spin-necked shoulder: four soft steps
     // die-necked shoulder: three distinct steps, each a short flat then a small inward roll
@@ -750,7 +763,7 @@
   can.add(body);
   scene.add(can);
 
-  var wallGeo = new THREE.LatheGeometry(wallPts, 256);
+  var wallGeo = new THREE.LatheGeometry(wallPts, lowGPU ? 160 : 256);
   (function uvByHeight() {
     var p = wallGeo.attributes.position, uv = wallGeo.attributes.uv;
     for (var i = 0; i < p.count; i++) uv.setY(i, p.getY(i) / CAN_TOP);
@@ -1038,7 +1051,7 @@
   }
 
   // adaptive resolution: if frames run long, render fewer pixels instead of dropping frames
-  var dprMax = Math.min(window.devicePixelRatio || 1, 2), dprNow = dprMax, slow = 0, fast = 0;
+  var dprMax = Math.min(window.devicePixelRatio || 1, DPR_CAP), dprNow = dprMax, slow = 0, fast = 0;
   function adaptDpr(dt) {
     if (dt > 0.022) { slow++; fast = 0; } else if (dt < 0.0135) { fast++; slow = 0; }
     if (slow > 20 && dprNow > 1) { dprNow = Math.max(1, dprNow - 0.25); renderer.setPixelRatio(dprNow); slow = 0; }
@@ -1060,11 +1073,26 @@
   }
 
   var clock = new THREE.Clock();
+  // idle half-rate: when nobody is scrolling and the can has settled, draw every other frame
+  // (keeps laptop GPUs cool; a hot integrated GPU throttles itself and that feels like lag)
+  var lastActive = performance.now(), oddFrame = false;
+  window.addEventListener("scroll", function () { lastActive = performance.now(); }, { passive: true });
+  window.addEventListener("pointermove", function () { lastActive = performance.now(); }, { passive: true });
+  function settled() {
+    for (var key in target) if (Math.abs(target[key] - pose[key]) > 0.002) return false;
+    return fizzLevel === 0 && puffT < 0 && Math.abs(tabTarget - tabT) < 0.01;
+  }
+
   function frame() {
     requestAnimationFrame(frame);
     if (paused || document.hidden) { clock.getDelta(); return; }
+    var idleNow = performance.now() - lastActive > 1200 && settled();
+    if (idleNow) {
+      oddFrame = !oddFrame;
+      if (oddFrame) return;                                   // clock keeps running, so motion stays smooth
+    }
     var raw = clock.getDelta();
-    adaptDpr(raw);
+    if (!idleNow) adaptDpr(raw);                              // half-rate idle frames are slow on purpose; don't punish them
     var dt = Math.min(raw, 0.05);
     var t = clock.elapsedTime;
     var k = 1 - Math.pow(0.0008, dt);
